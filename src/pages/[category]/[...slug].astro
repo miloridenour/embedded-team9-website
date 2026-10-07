@@ -1,0 +1,70 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { CATEGORIES } from '../../config';
+import { formatDate, getEntries } from '../../lib/entries';
+
+export async function getStaticPaths() {
+	const paths = await Promise.all(
+		CATEGORIES.map(async (category) => {
+			const entries = await getEntries(category.id);
+			return entries.map((entry, i) => ({
+				params: { category: category.id, slug: entry.id },
+				// entries are sorted newest/first-in-order first, so "previous"
+				// in reading order is the next item in the array.
+				props: { category, entry, prev: entries[i + 1], next: entries[i - 1] },
+			}));
+		}),
+	);
+	return paths.flat();
+}
+
+const { category, entry, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = (id: string) => `${base}/${category.id}/${id}/`;
+---
+
+<Layout title={entry.data.title} description={entry.data.description}>
+	<a class="back" href={`${base}/${category.id}/`}>&larr; {category.label}</a>
+	<article>
+		<header>
+			<h1>{entry.data.title}</h1>
+			<p class="meta">
+				{entry.data.date && <time datetime={entry.data.date.toISOString()}>{formatDate(entry.data.date)}</time>}
+				{entry.data.date && entry.data.authors.length > 0 && ' · '}
+				{entry.data.authors.join(', ')}
+			</p>
+		</header>
+		<Content />
+	</article>
+	<nav class="pager" aria-label="More entries">
+		{prev ? <a href={href(prev.id)}>&larr; {prev.data.title}</a> : <span />}
+		{next && <a href={href(next.id)}>{next.data.title} &rarr;</a>}
+	</nav>
+</Layout>
+
+<style>
+	.back {
+		font-size: 0.9rem;
+		text-decoration: none;
+	}
+	h1 {
+		margin: 0.75rem 0 0.25rem;
+	}
+	.meta {
+		color: var(--muted);
+		margin: 0 0 2rem;
+	}
+	.meta:empty {
+		display: none;
+	}
+	.pager {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-top: 3rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--border);
+	}
+</style>

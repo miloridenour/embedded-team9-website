@@ -1,0 +1,7 @@
+---
+import { DEFAULT_CATEGORY } from '../config';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+// 301 makes the static build emit an instant redirect (302 waits 2 seconds).
+return Astro.redirect(`${base}/${DEFAULT_CATEGORY}/`, 301);
+---

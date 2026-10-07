@@ -1,0 +1,31 @@
+---
+import EntryList from '../../components/EntryList.astro';
+import Layout from '../../layouts/Layout.astro';
+import { CATEGORIES } from '../../config';
+import { getEntries } from '../../lib/entries';
+
+export function getStaticPaths() {
+	return CATEGORIES.map((category) => ({
+		params: { category: category.id },
+		props: { category },
+	}));
+}
+
+const { category } = Astro.props;
+const entries = await getEntries(category.id);
+---
+
+<Layout title={category.label} description={category.description}>
+	<h1>{category.label}</h1>
+	<p class="lede">{category.description}</p>
+	<EntryList entries={entries} />
+</Layout>
+
+<style>
+	h1 {
+		margin-top: 0;
+	}
+	.lede {
+		color: var(--muted);
+	}
+</style>
