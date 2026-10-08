@@ -1,7 +1,8 @@
 ---
-import { DEFAULT_CATEGORY } from '../config';
-
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-// 301 makes the static build emit an instant redirect (302 waits 2 seconds).
-return Astro.redirect(`${base}/${DEFAULT_CATEGORY}/`, 301);
+// The home page renders the default tab directly (no redirect, so no flash).
+// Its canonical URL points at /<tab>/ so search engines treat them as one page.
+import CategoryPage from "../components/CategoryPage.astro";
+import { DEFAULT_CATEGORY } from "../config";
 ---
+
+<CategoryPage id={DEFAULT_CATEGORY} />

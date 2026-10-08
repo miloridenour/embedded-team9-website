@@ -1,0 +1,33 @@
+---
+import EntryList from "./EntryList.astro";
+import Layout from "../layouts/Layout.astro";
+import { getCategory, getEntries } from "../lib/entries";
+import type { CategoryId } from "../config";
+
+interface Props {
+    id: CategoryId;
+}
+
+const category = getCategory(Astro.props.id);
+const entries = await getEntries(category.id);
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+---
+
+<Layout
+    title={category.label}
+    description={category.description}
+    canonical={`${base}/${category.id}/`}
+>
+    <h1>{category.label}</h1>
+    <p class="lede">{category.description}</p>
+    <EntryList entries={entries} />
+</Layout>
+
+<style>
+    h1 {
+        margin-top: 0;
+    }
+    .lede {
+        color: var(--muted);
+    }
+</style>
